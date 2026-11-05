@@ -1,0 +1,36 @@
+{
+  "name": "cotiza-vercel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1",
+    "typecheck": "tsc --noEmit",
+    "test": "node --conditions=react-server --import ./tests/register.mjs --test tests/*.test.mjs",
+    "db:migrate": "node scripts/migrate.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.0",
+    "lucide-react": "1.31.0",
+    "next": "^16.3.4",
+    "postgres": "^4.0.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.15",
+    "@tailwindcss/postcss": "4.2.1",
+    "@types/node": "^24.19.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "tailwindcss": "4.2.1",
+    "typescript": "5.9.3"
+  }
+}
