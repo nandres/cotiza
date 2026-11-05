@@ -1,47 +1,57 @@
 # Cotiza
 
-Presupuestos para oficios. Aplicación completa en Next.js con PostgreSQL y cuentas de Supabase Auth: presupuestos, clientes, servicios, PDF del navegador y respuestas por enlace.
+[![CI](https://github.com/nandres/cotiza/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nandres/cotiza/actions/workflows/ci.yml)
 
-## Servicios
+Presupuestos para quien trabaja por su cuenta. Arma el presupuesto con tus servicios y precios, compartilo por WhatsApp o en PDF y mirá si el cliente lo aceptó o pidió cambios.
 
-- Producción: https://cotiza-nine.vercel.app
-- Los cobros siguen desactivados. Todos los usuarios tienen 3 presupuestos nuevos por mes; Profesional continúa como propuesta.
+**En línea:** https://cotiza-nine.vercel.app
 
-## Entorno
+![Página de inicio de Cotiza](docs/inicio.webp)
 
-Configurar las variables indicadas en `.env.example`. La URL y clave pública identifican el proyecto de Auth. `DATABASE_URL` es privada y pertenece exclusivamente al servidor. Usar el pooler de transacciones de Supabase, con su host exacto tomado de **Connect**, no un host construido a partir de la región. El adaptador desactiva prepared statements y pipelining.
+> **Software propietario.** Ver [LICENSE](LICENSE).
 
-En Supabase Auth, conservar la confirmación de correo y configurar:
+## Qué hace
 
-- Site URL: `https://cotiza-nine.vercel.app`
-- Redirect URL: `https://cotiza-nine.vercel.app/auth/callback`
-- Redirect URL de recuperación: `https://cotiza-nine.vercel.app/auth/callback?flow=recovery`
+- **Presupuestos** con tu marca, tus servicios y tus precios.
+- **Clientes y servicios guardados** para el siguiente presupuesto.
+- **Enlace público** para que el cliente responda sin crear una cuenta; la respuesta queda junto a la propuesta.
+- **PDF** desde el navegador.
+- **Cuentas** con confirmación de correo y recuperación de contraseña.
 
-Las páginas `/acceso`, `/acceso/registro`, `/acceso/recuperar` y `/acceso/actualizar` gestionan el acceso. El servidor verifica la sesión con Supabase; no confía en encabezados de identidad enviados por el cliente. El cierre de sesión usa `POST /auth/signout`.
+Los cobros están desactivados: todas las cuentas tienen 3 presupuestos nuevos por mes y el plan Profesional todavía es una propuesta.
 
-## Desarrollo y validación
+## Stack
 
-```sh
+| Capa | Tecnología |
+|---|---|
+| Aplicación | Next.js, React y TypeScript |
+| Base de datos | PostgreSQL, con migraciones SQL propias |
+| Cuentas | Supabase Auth |
+| Publicación | Vercel |
+
+## Cómo está resuelto
+
+- Cada petición de datos corre en una transacción con un bloqueo por usuario, para que la cuota no dependa de una lectura concurrente.
+- Los datos están aislados por usuario. El servidor verifica la sesión con Supabase.
+- `npm run db:migrate` aplica `migrations/` en orden, registra el SHA256 de cada archivo y rechaza cambios en los que ya se aplicaron.
+
+## Correrlo
+
+Requiere Node.js 24 y un proyecto de Supabase.
+
+```bash
 npm ci
+cp .env.example .env.local
+npm run db:migrate
 npm run dev
+```
+
+`DATABASE_URL` es privada y solo la usa el servidor. En Supabase Auth hay que dejar activa la confirmación de correo y registrar `/auth/callback` como URL de redirección.
+
+```bash
 npm run typecheck
 npm test
-node --test lib/supabase/paths.test.mjs
 npm run build
 ```
 
-Las pruebas de API utilizan PostgreSQL en PGlite y la misma migración/adaptador. Cubren aislamiento, cuotas, importes, vigencia, respuestas públicas y rollback; las conexiones alojadas y los correos requieren verificación con los servicios configurados.
-
-## Migraciones y despliegue
-
-`npm run db:migrate` aplica los archivos de `migrations/` en orden, registra su SHA256 y rechaza cambios a archivos ya aplicados. Puede usarse `DATABASE_MIGRATION_URL` con una conexión administrativa de sesión distinta a la conexión limitada de la app. Nunca se crean tablas desde una petición HTTP.
-
-Cada petición de datos usa una transacción y un bloqueo por usuario, de modo que la cuota y los cambios de moneda no dependen de una lectura concurrente sin protección. Los datos están aislados por usuario y los enlaces públicos usan tokens aleatorios revocables.
-
-Para publicar desde esta carpeta vinculada:
-
-```sh
-npx vercel@65.11.0 deploy --prod
-```
-
-Los secretos y las salidas locales quedan ignorados por Git y por el envío a Vercel. No añadir credenciales a código, migraciones ni documentos.
+Hecho por **Marcos Arellano** · [marcos-arellano.vercel.app](https://marcos-arellano.vercel.app)

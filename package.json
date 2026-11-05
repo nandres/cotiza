@@ -11,7 +11,7 @@
     "build": "next build",
     "start": "next start --hostname 127.0.0.1",
     "typecheck": "tsc --noEmit",
-    "test": "node --conditions=react-server --import ./tests/register.mjs --test tests/*.test.mjs",
+    "test": "node --test lib/supabase/paths.test.mjs",
     "db:migrate": "node scripts/migrate.mjs"
   },
   "dependencies": {
